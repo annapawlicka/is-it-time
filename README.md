@@ -1,18 +1,25 @@
 Is it time.. to upgrade?
 ========================
 
-Deployed to heroku: [is-it-time[(https://is-it-time.herokuapp.com/)
+Deployed to heroku: [is-it-time](https://is-it-time.herokuapp.com/)
 
 A very tiny web app to check how badly you need to upgrade your
-dependencies. Built with [Om](https://github.com/swannodette/om), [Sablono](https://github.com/r0man/sablono), [cljs-ajax](https://github.com/JulianBirch/cljs-ajax) and hacked bits of [version-clj](https://github.com/xsc/version-clj).
+dependencies. Built with [Om](https://github.com/swannodette/om),
+[Sablono](https://github.com/r0man/sablono),
+[cljs-ajax](https://github.com/JulianBirch/cljs-ajax), awesome
+template [chestnut](https://github.com/plexus/chestnut) and hacked
+bits of [version-clj](https://github.com/xsc/version-clj).
 
 
 ![Alt text](http://i.imgur.com/tpUQzNf.png "Is it time to upgrade?")
 
-### This is a WIP. ###
+### TODOs ###
 There are a few TODOs, e.g. dependencies with two part names
-("org.clojure/clojurescript") are not processed at the moment, and
-page needs to be refreshed to reset the dependencies. Will fix both soon.
+("org.clojure/clojurescript") are not processed at the moment (they
+show "No data", and page needs to be refreshed to reset the
+dependencies. Will fix both soon.
+
+PRs always wecolme :-)
 
 ## Development
 
@@ -35,12 +42,9 @@ Running `(browser-repl)` starts the Weasel REPL server, and drops you
 into a ClojureScript REPL. Evaluating expressions here will only work
 once you've loaded the page, so the browser can connect to Weasel.
 
-When you see the line `Successfully compiled "resources/public/app.js"
-in 21.36 seconds.`, you're ready to go. Browse to
+When you see the line `Successfully compiled "resources/public/is_it_time.js"
+in 7.825 seconds.`, you're ready to go. Browse to
 `http://localhost:10555` and enjoy.
-
-**Attention: It is not longer needed to run `lein figwheel`
-  separately. This is now taken care of behind the scenes**
 
 ## Deploying to Heroku
 
@@ -77,5 +81,4 @@ Now your app is running at
 
 Copyright © 2014 Anna Pawlicka
 
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Distributed under the Eclipse Public License.
