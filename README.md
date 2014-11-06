@@ -17,7 +17,9 @@ bits of [version-clj](https://github.com/xsc/version-clj).
 There are a few TODOs, e.g. dependencies with two part names
 ("org.clojure/clojurescript") are not processed at the moment (they
 show "No data", and page needs to be refreshed to reset the
-dependencies. Will fix both soon.
+dependencies. Will fix both soon (this was my programming break from
+another programming break from another project and my brain
+is refusing to do anything more atm...).
 
 PRs always wecolme :-)
 
