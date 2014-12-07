@@ -18,7 +18,9 @@
                (let [{:keys [status headers body error] :as resp} @(http/get "https://clojars.org/stats/all.edn")]
                  (if error (println error)
                      {:status 200
-                      :body (reader/read-string body)}))))
+                      :body (apply merge (map (fn [[k v]]
+                                                (hash-map (clojure.string/join "/" k) v))
+                                              (reader/read-string body)))}))))
 
 (deftemplate page
   (io/resource "index.html") [] [:body] (if is-dev? inject-devmode-html identity))

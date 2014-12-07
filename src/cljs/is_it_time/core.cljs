@@ -2,25 +2,23 @@
   (:require-macros [cljs.core.async.macros :refer [go go-loop]])
   (:require [om.core :as om  :include-macros true]
             [cljs.core.async :refer [<! chan put! alts!]]
-            [goog.events :as events]
-            [goog.dom.classes :as classes]
-            [sablono.core :as html :refer-macros [html]]
+            [sablono.core :refer-macros [html]]
             [cljs.reader :as reader]
             [ajax.core :refer (GET)]
-            [is-it-time.compare :as compare])
+            [is-it-time.compare :as compare]
+            [is-it-time.common :refer (log)]
+            [clojure.string :as str])
   (:import [goog.events EventType]))
 
 (enable-console-print!)
 
 (def app-model (atom {:dependencies []
+                      :file []
                       :spinner {:event :none}
                       :alert {}}))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Helpers
-
-(defn log [& s]
-  (.log js/console (apply str s)))
 
 (defn by-id [id]
   (.getElementById js/document id))
@@ -83,9 +81,13 @@
     (let [project-map (->> (reader/read-string file)
                            (drop 3)
                            (split-into-map keyword?))
-          dependencies (map (fn [[jar version]] {:name jar :version version}) (:dependencies project-map))]
+          dependencies (mapv (fn [[jar version]] (let [[group artifact] (str/split jar #"/")]
+                                                   (if-not artifact
+                                                     {:jar (str group "/" group) :version version}
+                                                     {:jar jar :version version})))
+                             (:dependencies project-map))]
       (om/update! cursor :spinner {:event :none})
-      (om/update! cursor :dependencies dependencies))
+      (om/update! cursor :file dependencies))
     (catch :default e
         (om/update! cursor :alert {:status true
                                    :class "alert alert-warning"
@@ -133,39 +135,21 @@
       (html
        [:p "Drop your project.clj here"]))))
 
+;; TODO Better parsing of versions: at the moment 0.3.0 > 0.10.0 !
 (defn latest-version [current versions]
   (filter #(< (compare/version-compare current %) 0) versions))
 
-;; TOFIX names of dependencies are not as simple as the below
-;; And gosh, this is so slow... Make it faster or at least add a spinner
 (defn check-status [dependency response]
-  (let [[_ versions] (first (filter (fn [[k v]]
-                                   (let [[group jar] k]
-                                     (and (= (str jar) (str (:name dependency)))
-                                          (= (str group) (str (:name dependency)))))) response))
-        latest   (latest-version (:version dependency) (keys versions))
-        status (cond
-                (and (seq versions) (seq latest)) {:label [:span.label.label-danger "Yes, it is!"] :latest latest}
-                (and (seq versions) (empty? latest)) {:label [:span.label.label-success "No, you're fine."]}
-                :else {:label [:span.label.label-default "No data."]})]
+  (let [versions   (get response (str (:jar dependency)))
+        latest     (latest-version (:version dependency) (keys versions))
+        status     (cond
+                     (and (seq versions) (seq latest)) {:label {:class "label label-danger" :text "Yes, it is!"} :latest latest}
+                     (and (seq versions) (empty? latest)) {:label {:class "label label-success" :text "No, you're fine."}}
+                     :else {:label {:class "label label-default" :text "No data."}})]
     (assoc dependency :status status)))
 
-(defn dependencies-list [cursor owner]
+(defn dependencies-list [dependencies owner]
   (reify
-   om/IWillMount
-   (will-mount [_]
-     (om/update! cursor :spinner {:event :fetching})
-     (GET "/stats"
-          {:handler (fn [response]
-                      (om/transact! cursor [:dependencies]
-                                    (fn [dependencies]
-                                      (map #(check-status % (:body response))
-                                           dependencies)))
-                      (om/update! cursor :spinner {:event :none}))
-           :error-handler (fn [{:keys [status status-text]}]
-                            (om/update! cursor :alert {:status true
-                                                       :class "alert alert-danger"
-                                                       :text status-text}))}))
     om/IRender
     (render [_]
       (html
@@ -174,19 +158,30 @@
          [:table.table
           [:thead
            [:tr
-            [:th "Name"] [:th "Version"] [:th "Status"] [:th "Newer versions"]]]
+            [:th "Dependency"] [:th "Version"] [:th "Status"] [:th "Newer versions"]]]
           [:tbody
-           (for [dependency (:dependencies cursor)]
-             (let [{:keys [name version status]} dependency
+           (for [dependency (js->clj dependencies)]
+             (let [{:keys [jar version status]} dependency
                    {:keys [label latest]} status]
                [:tr
-                [:td (str name)]
+                [:td (str jar)]
                 [:td (str version)]
-                [:td label]
+                [:td [:span {:class (:class label)} (:text label)]]
                 [:td (interpose ", " latest)]]))]]]]))))
 
 (defn is-it-time-view [cursor owner]
   (reify
+    om/IWillMount
+    (will-mount [_]
+      (om/update! cursor :spinner {:event :fetching})
+      (GET "/stats"
+           {:handler (fn [response]
+                       (om/update! cursor :dependencies (:body response))
+                       (om/update! cursor :spinner {:event :none}))
+            :error-handler (fn [{:keys [status status-text]}]
+                             (om/update! cursor :alert {:status true
+                                                        :class "alert alert-danger"
+                                                        :text status-text}))}))
     om/IRender
     (render [_]
       (html
@@ -196,13 +191,14 @@
         [:div.row.col-md-12.col-centered {:id "spinner"} (om/build spinner (:spinner cursor))]
         [:div {:id "alert"}
          (om/build alert (:alert cursor))]
-        (if-not (seq (:dependencies cursor))
+        (if-not (seq (:file cursor))
           [:div {:id "drop-zone"}
            [:div.well.well-lg
             (om/build drop-zone cursor)]]
           [:div
-           (om/build dependencies-list cursor)])]))))
-
+           (om/build dependencies-list (:file cursor) {:fn (fn [file]
+                                                             (mapv #(check-status % (:dependencies cursor))
+                                                                   file))})])]))))
 (defn main []
   (om/root is-it-time-view app-model
            {:target (.getElementById js/document "app")}))

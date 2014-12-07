@@ -11,21 +11,21 @@
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
 
                  ;; Server
-                 [ring "1.3.1"]
-                 [liberator "0.10.0"]
-                 [compojure "1.2.0"]
-                 [http-kit "2.1.18"]
+                 [ring "1.3.2"]
+                 [liberator "0.12.2"]
+                 [compojure "1.3.1"]
+                 [http-kit "2.1.19"]
                  [enlive "1.1.5"]
 
                  ;; Client
-                 [om "0.7.3"]
-                 [sablono "0.2.20"]
-                 [figwheel "0.1.4-SNAPSHOT"]
+                 [om "0.8.0-beta2"]
+                 [sablono "0.2.22"]
+                 [figwheel "0.1.6-SNAPSHOT"]
                  [cljs-ajax "0.2.6"]
 
                  [environ "1.0.0"]
                  [com.cemerick/piggieback "0.1.3"]
-                 [weasel "0.4.0-SNAPSHOT"]
+                 [weasel "0.4.3-SNAPSHOT"]
                  [leiningen "2.5.0"]]
 
   :plugins [[lein-cljsbuild "1.0.3"]
