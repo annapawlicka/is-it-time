@@ -14,14 +14,10 @@ bits of [version-clj](https://github.com/xsc/version-clj).
 ![Alt text](http://i.imgur.com/tpUQzNf.png "Is it time to upgrade?")
 
 ### TODOs ###
-There are a few TODOs, e.g. dependencies with two part names
-("org.clojure/clojurescript") are not processed at the moment (they
-show "No data", and page needs to be refreshed to reset the
-dependencies. Will fix both soon (this was my programming break from
-another programming break from another project and my brain
-is refusing to do anything more atm...).
-
-PRs always wecolme :-)
+There are a few TODOs, e.g. parsing of dependencies must be improved
+(1.3.0 is shown as > 1.20.0), and page needs to be refreshed to reset the
+dependencies. Will fix both soon unless PRs from kind people of Internet
+will fix them sooner. Because PRs are always wecolme :-)
 
 ## Development
 
