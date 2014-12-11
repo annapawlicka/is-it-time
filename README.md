@@ -79,4 +79,4 @@ Now your app is running at
 
 Copyright © 2014 Anna Pawlicka
 
-Distributed under the Eclipse Public License.
+Distributed under the Eclipse Public License either version 1.0 or (at your option) any later version.
