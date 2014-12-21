@@ -1,3 +1,5 @@
+[![Build Status](https://travis-ci.org/annapawlicka/is-it-time.svg?branch=master)](https://travis-ci.org/annapawlicka/is-it-time)
+
 Is it time.. to upgrade?
 ========================
 
