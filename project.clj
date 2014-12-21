@@ -49,7 +49,8 @@
                                          :preamble      ["react/react.min.js"]
                                          :externs       ["react/externs/react.js"]
                                          :optimizations :whitespace
-                                         :pretty-print  true}}}}
+                                         :pretty-print  true}}}
+              :test-commands {"test" ["phantomjs" "phantom/unit-test.js" "phantom/unit-test.html"]}}
 
   :profiles {:dev {:repl-options {:init-ns is-it-time.server
                                   :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
