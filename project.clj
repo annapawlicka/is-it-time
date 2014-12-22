@@ -14,7 +14,7 @@
                  [ring "1.3.2"]
                  [liberator "0.12.2"]
                  [compojure "1.3.1"]
-                 [http-kit "2.1.19"]
+                 [http-kit "2.2.0-SNAPSHOT"]
                  [enlive "1.1.5"]
 
                  ;; Client
@@ -24,7 +24,7 @@
                  [cljs-ajax "0.2.6"]
 
                  [environ "1.0.0"]
-                 [com.cemerick/piggieback "0.1.3"]
+                 [com.cemerick/piggieback "0.1.4-SNAPSHOT"]
                  [weasel "0.4.3-SNAPSHOT"]
                  [leiningen "2.5.0"]]
 
