@@ -1,4 +1,4 @@
-(ns is-it-time.compare-test
+(ns is-it-time.test.compare-test
   (:require [cljs.test :refer-macros [deftest testing is]]
             [is-it-time.compare :as compare]))
 
