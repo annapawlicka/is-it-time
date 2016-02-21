@@ -4,73 +4,81 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
 
-  :source-paths ["src/clj" "src/cljs"]
+  :dependencies [[org.clojure/clojure "1.8.0-RC5"]
+                 [org.clojure/clojurescript "1.7.228" :scope "provided"]
+                 [ring "1.4.0"]
+                 [ring/ring-defaults "0.1.5"]
+                 [bk/ring-gzip "0.1.1"]
+                 [ring.middleware.logger "0.5.0"]
+                 [compojure "1.4.0"]
 
-  :dependencies [[org.clojure/clojure "1.6.0"]
-                 [org.clojure/clojurescript "0.0-2505" :scope "provided"]
-                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-
-                 ;; Server
-                 [ring "1.3.2"]
-                 [liberator "0.12.2"]
-                 [compojure "1.3.1"]
-                 [http-kit "2.2.0-SNAPSHOT"]
-                 [enlive "1.1.5"]
+                 [environ "1.0.2"]
 
                  ;; Client
-                 [om "0.8.0-beta3"]
-                 [sablono "0.2.22"]
-                 [figwheel "0.1.6-SNAPSHOT"]
-                 [cljs-ajax "0.2.6"]
+                 [org.omcljs/om "1.0.0-alpha28"]
+                 [sablono "0.6.2"]
+                 [cljs-ajax "0.5.3"]]
 
-                 [environ "1.0.0"]
-                 [com.cemerick/piggieback "0.1.4-SNAPSHOT"]
-                 [weasel "0.4.3-SNAPSHOT"]
-                 [leiningen "2.5.0"]]
+  :plugins [[lein-cljsbuild "1.1.1"]
+            [lein-environ "1.0.1"]]
 
-  :plugins [[lein-cljsbuild "1.0.4-SNAPSHOT"]
-            [lein-environ "1.0.0"]]
+  :min-lein-version "2.5.3"
 
-  :min-lein-version "2.5.0"
+  :source-paths ["src/clj" "src/cljs" "dev"]
+
+  :test-paths ["test/clj"]
+
+  :clean-targets ^{:protect false} [:target-path :compile-path "resources/public/js"]
 
   :uberjar-name "is-it-time.jar"
 
-  :cljsbuild {:builds {:is-it-time {:source-paths ["src/cljs"]
-                                    :compiler {:output-to     "resources/public/js/is_it_time.js"
-                                               :output-dir    "resources/public/js/out"
-                                               :source-map    "resources/public/js/out.js.map"
-                                               :preamble      ["react/react.min.js"]
-                                               :externs       ["react/externs/react.js"]
-                                               :optimizations :none
-                                               :pretty-print  true}}
-                       :test {:source-paths ["src/cljs" "test/cljs"]
-                              :notify-command ["phantomjs" "phantom/unit-test.js" "phantom/unit-test.html"]
-                              :compiler {:output-to     "target/testable.js"
-                                         :preamble      ["react/react.min.js"]
-                                         :externs       ["react/externs/react.js"]
-                                         :optimizations :whitespace
-                                         :pretty-print  true}}}
-              :test-commands {"test" ["phantomjs" "phantom/unit-test.js" "phantom/unit-test.html"]}}
+  :main is-it-time.server
 
-  :profiles {:dev {:repl-options {:init-ns is-it-time.server
-                                  :nrepl-middleware [cemerick.piggieback/wrap-cljs-repl]}
+  :repl-options {:init-ns user}
 
-                   :plugins [[lein-figwheel "0.1.4-SNAPSHOT"]]
+  :cljsbuild {:builds
+              {:app
+               {:source-paths ["src/cljs"]
 
-                   :figwheel {:http-server-root "public"
-                              :port 3449
-                              :css-dirs ["resources/public/css"]}
+                :figwheel true
 
-                   :env {:is-dev true}
+                :compiler {:main is-it-time.core
+                           :asset-path "js/compiled/out"
+                           :output-to "resources/public/js/compiled/is_it_time.js"
+                           :output-dir "resources/public/js/compiled/out"
+                           :source-map-timestamp true}}}}
 
-                   :cljsbuild {:builds {:is-it-time {:source-paths ["env/dev/cljs"]}}}}
+  :figwheel {:css-dirs ["resources/public/css"]
+             :ring-handler user/http-handler
+             :server-logfile "log/figwheel.log"}
 
-             :uberjar {:hooks [leiningen.cljsbuild]
-                       :env {:production true}
-                       :omit-source true
-                       :aot :all
-                       :cljsbuild {:builds {:is-it-time
-                                            {:source-paths ["env/prod/cljs"]
-                                             :compiler
-                                             {:optimizations :advanced
-                                              :pretty-print false}}}}}})
+  :doo {:build "test"}
+
+  :profiles {:dev
+             {:dependencies [[figwheel "0.5.0-6"]
+                             [figwheel-sidecar "0.5.0-6"]
+                             [com.cemerick/piggieback "0.2.1"]
+                             [org.clojure/tools.nrepl "0.2.12"]]
+
+              :plugins [[lein-figwheel "0.5.0-6"]
+                        [lein-doo "0.1.6"]]
+
+              :cljsbuild {:builds
+                          {:test
+                           {:source-paths ["src/cljs" "test/cljs"]
+                            :compiler
+                            {:output-to "resources/public/js/compiled/testable.js"
+                             :main is-it-time.test-runner
+                             :optimizations :none}}}}}
+
+             :uberjar
+             {:source-paths ^:replace ["src/clj"]
+              :hooks [leiningen.cljsbuild]
+              :omit-source true
+              :aot :all
+              :cljsbuild {:builds
+                          {:app
+                           {:source-paths ^:replace ["src/cljs"]
+                            :compiler
+                            {:optimizations :advanced
+                             :pretty-print false}}}}}})

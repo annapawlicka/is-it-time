@@ -1,14 +1,13 @@
 (ns is-it-time.core
-  (:require-macros [cljs.core.async.macros :refer [go go-loop]])
-  (:require [om.core :as om  :include-macros true]
+  (:require [om.core :as om :include-macros true]
+            [om.dom :as dom :include-macros true]
             [cljs.core.async :refer [<! chan put! alts!]]
             [sablono.core :refer-macros [html]]
             [cljs.reader :as reader]
             [ajax.core :refer (GET)]
             [is-it-time.compare :as compare]
             [is-it-time.common :refer (log)]
-            [clojure.string :as str])
-  (:import [goog.events EventType]))
+            [clojure.string :as str]))
 
 (enable-console-print!)
 
@@ -169,15 +168,20 @@
                 [:td [:span {:class (:class label)} (:text label)]]
                 [:td (interpose ", " latest)]]))]]]]))))
 
+
 (defn is-it-time-view [cursor owner]
   (reify
     om/IWillMount
     (will-mount [_]
       (om/update! cursor :spinner {:event :fetching})
-      (GET "/stats"
+      (GET "https://clojars.org/stats/all.edn"
            {:handler (fn [response]
-                       (om/update! cursor :dependencies (:body response))
-                       (om/update! cursor :spinner {:event :none}))
+                       (let [dependencies (apply merge
+                                                 (map (fn [[k v]]
+                                                        (hash-map (clojure.string/join "/" k) v))
+                                                      (reader/read-string response)))]
+                         (om/update! cursor :dependencies dependencies)
+                         (om/update! cursor :spinner {:event :none})))
             :error-handler (fn [{:keys [status status-text]}]
                              (om/update! cursor :alert {:status true
                                                         :class "alert alert-danger"
@@ -199,6 +203,8 @@
            (om/build dependencies-list (:file cursor) {:fn (fn [file]
                                                              (mapv #(check-status % (:dependencies cursor))
                                                                    file))})])]))))
-(defn main []
-  (om/root is-it-time-view app-model
-           {:target (.getElementById js/document "app")}))
+
+(om/root
+ is-it-time-view
+ app-model
+ {:target (. js/document (getElementById "app"))})
